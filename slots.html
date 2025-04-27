@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>БЕЗУМНОЕ КАЗИНО</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            overflow: hidden;
+            font-family: 'Press Start 2P', cursive;
+            color: #fff;
+            user-select: none;
+        }
+        
+        #casino-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle, #1a0033, #000);
+            overflow: hidden;
+        }
+        
+        #particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        #main-game {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+        
+        #slot-machine {
+            width: 600px;
+            height: 300px;
+            background: linear-gradient(145deg, #ff00cc, #3333ff);
+            border: 8px solid #ff0;
+            border-radius: 20px;
+            box-shadow: 0 0 50px #ff00cc, 
+                        0 0 100px #3333ff,
+                        0 0 150px #ff0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .slot {
+            width: 150px;
+            height: 250px;
+            background: rgba(0,0,0,0.7);
+            border: 4px solid #fff;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .slot-item {
+            width: 100%;
+            height: 250px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 60px;
+            color: #fff;
+            text-shadow: 0 0 10px currentColor;
+            transition: transform 0.1s;
+        }
+        
+        #controls {
+            margin-top: 40px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        #balance {
+            font-size: 24px;
+            color: #ff0;
+            text-shadow: 0 0 10px #ff0;
+        }
+        
+        #bet-amount {
+            font-size: 24px;
+            color: #0f0;
+            text-shadow: 0 0 10px #0f0;
+        }
+        
+        button {
+            background: linear-gradient(145deg, #ff00cc, #3333ff);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-family: 'Press Start 2P', cursive;
+            cursor: pointer;
+            border-radius: 10px;
+            box-shadow: 0 0 20px #ff00cc;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 40px #ff00cc;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            transform: none !important;
+            box-shadow: none;
+        }
+        
+        button::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to bottom right, 
+                transparent, 
+                transparent, 
+                transparent, 
+                rgba(255,255,255,0.3), 
+                transparent
+            );
+            transform: rotate(30deg);
+            animation: shine 3s infinite;
+        }
+        
+        @keyframes shine {
+            0% { left: -50%; }
+            100% { left: 150%; }
+        }
+        
+        #win-effect {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, transparent, rgba(255,255,255,0.3));
+            pointer-events: none;
+            opacity: 0;
+            z-index: 10;
+            transition: opacity 0.5s;
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #f00;
+            opacity: 0;
+            z-index: 5;
+        }
+        
+        #jackpot {
+            position: absolute;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 40px;
+            color: #ff0;
+            text-shadow: 0 0 20px #ff0;
+            opacity: 0;
+            transition: all 0.5s;
+            z-index: 10;
+        }
+        
+        #sound-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.5);
+            border: 2px solid #fff;
+            color: #fff;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div id="casino-container">
+        <canvas id="particles"></canvas>
+        <div id="win-effect"></div>
+        <div id="jackpot">ДЖЕКПОТ!!!</div>
+        
+        <div id="main-game">
+            <div id="slot-machine">
+                <div class="slot" id="slot1">
+                    <div class="slot-item">🍒</div>
+                </div>
+                <div class="slot" id="slot2">
+                    <div class="slot-item">🍋</div>
+                </div>
+                <div class="slot" id="slot3">
+                    <div class="slot-item">🍊</div>
+                </div>
+            </div>
+            
+            <div id="controls">
+                <div id="balance">Баланс: $1000</div>
+                <div id="bet-amount">Ставка: $100</div>
+                <button id="spin-btn">КРУТИТЬ!</button>
+                <button id="bet-up">+</button>
+                <button id="bet-down">-</button>
+            </div>
+        </div>
+        
+        <div id="sound-toggle">🔊</div>
+    </div>
+
+    <audio id="spin-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-slot-machine-spin-1930.mp3"></audio>
+    <audio id="win-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3"></audio>
+    <audio id="jackpot-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3"></audio>
+    <audio id="lose-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-retro-game-over-213.mp3"></audio>
+    <audio id="background-music" loop src="https://assets.mixkit.co/music/preview/mixkit-game-show-suspense-waiting-668.mp3"></audio>
+
+    <script>
+        // Игровые переменные
+        let balance = 1000;
+        let betAmount = 100;
+        let isSpinning = false;
+        let soundEnabled = true;
+        
+        // Элементы интерфейса
+        const balanceDisplay = document.getElementById('balance');
+        const betAmountDisplay = document.getElementById('bet-amount');
+        const spinBtn = document.getElementById('spin-btn');
+        const betUpBtn = document.getElementById('bet-up');
+        const betDownBtn = document.getElementById('bet-down');
+        const slots = [document.getElementById('slot1'), document.getElementById('slot2'), document.getElementById('slot3')];
+        const winEffect = document.getElementById('win-effect');
+        const jackpotDisplay = document.getElementById('jackpot');
+        const soundToggle = document.getElementById('sound-toggle');
+        
+        // Аудио элементы
+        const spinSound = document.getElementById('spin-sound');
+        const winSound = document.getElementById('win-sound');
+        const jackpotSound = document.getElementById('jackpot-sound');
+        const loseSound = document.getElementById('lose-sound');
+        const backgroundMusic = document.getElementById('background-music');
+        
+        // Символы для слотов
+        const symbols = ['🍒', '🍋', '🍊', '🍇', '🍉', '7️⃣', '💰', '🍀'];
+        
+        // Инициализация
+        function init() {
+            updateDisplays();
+            createParticles();
+            playBackgroundMusic();
+            
+            // Обработчики событий
+            spinBtn.addEventListener('click', spinSlots);
+            betUpBtn.addEventListener('click', () => changeBet(100));
+            betDownBtn.addEventListener('click', () => changeBet(-100));
+            soundToggle.addEventListener('click', toggleSound);
+        }
+        
+        // Обновление отображения баланса и ставки
+        function updateDisplays() {
+            balanceDisplay.textContent = `Баланс: $${balance}`;
+            betAmountDisplay.textContent = `Ставка: $${betAmount}`;
+            
+            // Блокировка кнопок при недостатке средств
+            betUpBtn.disabled = balance <= betAmount;
+            betDownBtn.disabled = betAmount <= 100;
+            spinBtn.disabled = balance < betAmount || isSpinning;
+        }
+        
+        // Изменение ставки
+        function changeBet(amount) {
+            const newBet = betAmount + amount;
+            if (newBet >= 100 && newBet <= balance) {
+                betAmount = newBet;
+                updateDisplays();
+            }
+        }
+        
+        // Вращение слотов
+        function spinSlots() {
+            if (isSpinning || balance < betAmount) return;
+            
+            isSpinning = true;
+            balance -= betAmount;
+            updateDisplays();
+            
+            playSound(spinSound);
+            
+            // Анимация вращения
+            const spinDuration = 3000; // 3 секунды
+            const startTime = Date.now();
+            
+            // Случайные результаты
+            const results = [
+                symbols[Math.floor(Math.random() * symbols.length)],
+                symbols[Math.floor(Math.random() * symbols.length)],
+                symbols[Math.floor(Math.random() * symbols.length)]
+            ];
+            
+            // Проверка на выигрыш (упрощённая логика)
+            const isWin = results[0] === results[1] && results[1] === results[2];
+            const isJackpot = isWin && results[0] === '💰';
+            
+            // Анимация
+            function animate() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / spinDuration, 1);
+                
+                // Вращение слотов
+                slots.forEach((slot, index) => {
+                    const slotItems = slot.querySelectorAll('.slot-item');
+                    const offset = Math.floor(Math.random() * symbols.length) * -250;
+                    
+                    if (progress < 0.9) {
+                        // Быстрое вращение
+                        slotItems[0].style.transform = `translateY(${offset}px)`;
+                        slotItems[0].textContent = symbols[Math.floor(Math.random() * symbols.length)];
+                    } else if (progress >= 0.9 && progress < 1) {
+                        // Замедление
+                        const slowOffset = (progress - 0.9) * 10;
+                        slotItems[0].style.transform = `translateY(${offset * (1 - slowOffset)}px)`;
+                    } else {
+                        // Фиксация результата
+                        slotItems[0].style.transform = 'translateY(0)';
+                        slotItems[0].textContent = results[index];
+                    }
+                });
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    // Завершение вращения
+                    isSpinning = false;
+                    
+                    // Проверка выигрыша
+                    if (isWin) {
+                        const winMultiplier = isJackpot ? 10 : results[0] === '7️⃣' ? 5 : 3;
+                        const winAmount = betAmount * winMultiplier;
+                        balance += winAmount;
+                        
+                        if (isJackpot) {
+                            showJackpot();
+                            playSound(jackpotSound);
+                        } else {
+                            showWinEffect();
+                            playSound(winSound);
+                        }
+                        
+                        createConfetti();
+                        
+                        // Сообщение о выигрыше
+                        const winMessages = {
+                            '🍒': 'Вишнёвый выигрыш!',
+                            '🍋': 'Лимонный куш!',
+                            '🍊': 'Апельсиновый джекпот!',
+                            '🍇': 'Виноградный взрыв!',
+                            '🍉': 'Арбузный фурор!',
+                            '7️⃣': 'СЧАСТЛИВАЯ СЕМЁРКА!',
+                            '💰': 'МЕГА ДЖЕКПОТ!!!',
+                            '🍀': 'Удача на твоей стороне!'
+                        };
+                        
+                        alert(`${winMessages[results[0]]} Вы выиграли $${winAmount}!`);
+                    } else {
+                        playSound(loseSound);
+                    }
+                    
+                    updateDisplays();
+                }
+            }
+            
+            animate();
+        }
+        
+        // Эффект выигрыша
+        function showWinEffect() {
+            winEffect.style.opacity = '1';
+            setTimeout(() => {
+                winEffect.style.opacity = '0';
+            }, 1000);
+        }
+        
+        // Эффект джекпота
+        function showJackpot() {
+            jackpotDisplay.style.top = '50px';
+            jackpotDisplay.style.opacity = '1';
+            
+            setTimeout(() => {
+                jackdotDisplay.style.top = '-100px';
+                jackpotDisplay.style.opacity = '0';
+            }, 3000);
+        }
+        
+        // Создание конфетти
+        function createConfetti() {
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+            
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = `${Math.random() * 100}vw`;
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.opacity = '1';
+                document.body.appendChild(confetti);
+                
+                // Анимация падения
+                const animation = confetti.animate([
+                    { transform: `translateY(-100px) rotate(0deg)`, opacity: 1 },
+                    { transform: `translateY(100vh) rotate(${Math.random() * 360}deg)`, opacity: 0 }
+                ], {
+                    duration: 2000 + Math.random() * 3000,
+                    easing: 'cubic-bezier(0.1, 0.8, 0.9, 1)'
+                });
+                
+                animation.onfinish = () => confetti.remove();
+            }
+        }
+        
+        // Частицы фона
+        function createParticles() {
+            const canvas = document.getElementById('particles');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            const particles = [];
+            const particleCount = 100;
+            
+            for (let i = 0; i < particleCount; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 3 + 1,
+                    speedX: Math.random() * 2 - 1,
+                    speedY: Math.random() * 2 - 1,
+                    color: `hsl(${Math.random() * 360}, 100%, 50%)`
+                });
+            }
+            
+            function animateParticles() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                for (let i = 0; i < particles.length; i++) {
+                    const p = particles[i];
+                    
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color;
+                    ctx.fill();
+                    
+                    p.x += p.speedX;
+                    p.y += p.speedY;
+                    
+                    if (p.x < 0 || p.x > canvas.width) p.speedX *= -1;
+                    if (p.y < 0 || p.y > canvas.height) p.speedY *= -1;
+                }
+                
+                requestAnimationFrame(animateParticles);
+            }
+            
+            animateParticles();
+        }
+        
+        // Управление звуком
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            
+            if (soundEnabled) {
+                soundToggle.textContent = '🔊';
+                playBackgroundMusic();
+            } else {
+                soundToggle.textContent = '🔇';
+                pauseAllSounds();
+            }
+        }
+        
+        function playSound(sound) {
+            if (!soundEnabled) return;
+            
+            sound.currentTime = 0;
+            sound.play().catch(e => console.log(e));
+        }
+        
+        function playBackgroundMusic() {
+            if (!soundEnabled) return;
+            
+            backgroundMusic.volume = 0.3;
+            backgroundMusic.play().catch(e => console.log(e));
+        }
+        
+        function pauseAllSounds() {
+            spinSound.pause();
+            winSound.pause();
+            jackpotSound.pause();
+            loseSound.pause();
+            backgroundMusic.pause();
+        }
+        
+        // Запуск игры
+        window.onload = init;
+    </script>
+</body>
+</html>
