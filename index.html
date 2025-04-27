@@ -1,529 +1,434 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <title>БЕЗУМНОЕ КАЗИНО</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Казино Краш</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-        
         body {
             margin: 0;
-            padding: 0;
-            background: #000;
             overflow: hidden;
-            font-family: 'Press Start 2P', cursive;
-            color: #fff;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            font-family: 'Arial', sans-serif;
+            color: white;
             user-select: none;
         }
         
-        #casino-container {
+        #game-container {
             position: relative;
             width: 100vw;
             height: 100vh;
-            background: radial-gradient(circle, #1a0033, #000);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #crash-display {
+            position: relative;
+            width: 300px;
+            height: 150px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            border: 2px solid gold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
             overflow: hidden;
         }
         
-        #particles {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-        
-        #main-game {
-            position: relative;
+        #multiplier {
+            font-size: 4rem;
+            font-weight: bold;
+            background: linear-gradient(to right, gold, #ff8c00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
             z-index: 2;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
         }
         
-        #slot-machine {
-            width: 600px;
-            height: 300px;
-            background: linear-gradient(145deg, #ff00cc, #3333ff);
-            border: 8px solid #ff0;
-            border-radius: 20px;
-            box-shadow: 0 0 50px #ff00cc, 
-                        0 0 100px #3333ff,
-                        0 0 150px #ff0;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            padding: 20px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .slot {
-            width: 150px;
-            height: 250px;
-            background: rgba(0,0,0,0.7);
-            border: 4px solid #fff;
-            border-radius: 10px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            position: relative;
-        }
-        
-        .slot-item {
-            width: 100%;
-            height: 250px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 60px;
-            color: #fff;
-            text-shadow: 0 0 10px currentColor;
-            transition: transform 0.1s;
-        }
-        
-        #controls {
-            margin-top: 40px;
-            display: flex;
-            gap: 20px;
-            align-items: center;
-        }
-        
-        #balance {
-            font-size: 24px;
-            color: #ff0;
-            text-shadow: 0 0 10px #ff0;
-        }
-        
-        #bet-amount {
-            font-size: 24px;
-            color: #0f0;
-            text-shadow: 0 0 10px #0f0;
-        }
-        
-        button {
-            background: linear-gradient(145deg, #ff00cc, #3333ff);
-            border: none;
-            color: white;
-            padding: 15px 30px;
-            font-size: 18px;
-            font-family: 'Press Start 2P', cursive;
-            cursor: pointer;
-            border-radius: 10px;
-            box-shadow: 0 0 20px #ff00cc;
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        button:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 40px #ff00cc;
-        }
-        
-        button:disabled {
-            opacity: 0.5;
-            transform: none !important;
-            box-shadow: none;
-        }
-        
-        button::before {
-            content: '';
+        #graph {
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(
-                to bottom right, 
-                transparent, 
-                transparent, 
-                transparent, 
-                rgba(255,255,255,0.3), 
-                transparent
-            );
-            transform: rotate(30deg);
-            animation: shine 3s infinite;
-        }
-        
-        @keyframes shine {
-            0% { left: -50%; }
-            100% { left: 150%; }
-        }
-        
-        #win-effect {
-            position: fixed;
-            top: 0;
+            bottom: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle, transparent, rgba(255,255,255,0.3));
-            pointer-events: none;
-            opacity: 0;
-            z-index: 10;
-            transition: opacity 0.5s;
+            z-index: 1;
+            opacity: 0.3;
+        }
+        
+        #controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        #bet-input {
+            padding: 15px;
+            width: 200px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+        
+        #bet-amount {
+            color: gold;
+            font-size: 1.5rem;
+            margin-top: 5px;
+        }
+        
+        button {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(45deg, #ff8c00, gold);
+            color: #1a1a2e;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 215, 0, 0.6);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        button:disabled {
+            background: gray;
+            box-shadow: none;
+            transform: none;
+            cursor: not-allowed;
         }
         
         .confetti {
             position: absolute;
             width: 10px;
             height: 10px;
-            background: #f00;
+            background: gold;
             opacity: 0;
-            z-index: 5;
         }
         
-        #jackpot {
+        #history {
             position: absolute;
-            top: -100px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 40px;
-            color: #ff0;
-            text-shadow: 0 0 20px #ff0;
-            opacity: 0;
-            transition: all 0.5s;
-            z-index: 10;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .history-item {
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .win {
+            background: linear-gradient(45deg, #4CAF50, #8BC34A);
+        }
+        
+        .lose {
+            background: linear-gradient(45deg, #F44336, #FF9800);
+        }
+        
+        #balance {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 1.5rem;
+            color: gold;
         }
         
         #sound-toggle {
             position: absolute;
-            top: 20px;
+            bottom: 20px;
             right: 20px;
-            background: rgba(0,0,0,0.5);
-            border: 2px solid #fff;
-            color: #fff;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
             cursor: pointer;
-            z-index: 100;
         }
     </style>
 </head>
 <body>
-    <div id="casino-container">
-        <canvas id="particles"></canvas>
-        <div id="win-effect"></div>
-        <div id="jackpot">ДЖЕКПОТ!!!</div>
+    <div id="game-container">
+        <div id="balance">Баланс: <span id="balance-amount">1000</span>₽</div>
         
-        <div id="main-game">
-            <div id="slot-machine">
-                <div class="slot" id="slot1">
-                    <div class="slot-item">пися</div>
-                </div>
-                <div class="slot" id="slot2">
-                    <div class="slot-item">кака</div>
-                </div>
-                <div class="slot" id="slot3">
-                    <div class="slot-item">жепе</div>
-                </div>
-            </div>
-            
-            <div id="controls">
-                <div id="balance">Баланс: $1000</div>
-                <div id="bet-amount">Ставка: $100</div>
-                <button id="spin-btn">КРУТИТЬ!</button>
-                <button id="bet-up">+</button>
-                <button id="bet-down">-</button>
-            </div>
+        <div id="crash-display">
+            <div id="multiplier">1.00x</div>
+            <canvas id="graph"></canvas>
         </div>
         
-        <div id="sound-toggle">🔊</div>
+        <div id="controls">
+            <input type="number" id="bet-input" min="10" max="1000" value="100">
+            <div id="bet-amount">Ставка: 100₽</div>
+            <button id="bet-button">Сделать ставку</button>
+            <button id="cashout-button" disabled>Забрать</button>
+        </div>
+        
+        <div id="history"></div>
+        
+        <button id="sound-toggle">🔊</button>
     </div>
-
-    <audio id="spin-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-slot-machine-spin-1930.mp3"></audio>
-    <audio id="win-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3"></audio>
-    <audio id="jackpot-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3"></audio>
-    <audio id="lose-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-retro-game-over-213.mp3"></audio>
-    <audio id="background-music" loop src="https://assets.mixkit.co/music/preview/mixkit-game-show-suspense-waiting-668.mp3"></audio>
-
+    
+    <audio id="tick-sound" src="https://www.soundjay.com/buttons/sounds/button-09.mp3" preload="auto"></audio>
+    <audio id="crash-sound" src="https://www.soundjay.com/mechanical/sounds/explosion-01.mp3" preload="auto"></audio>
+    <audio id="win-sound" src="https://www.soundjay.com/human/sounds/applause-8.mp3" preload="auto"></audio>
+    
     <script>
-        // Игровые переменные
+        // Инициализация переменных
         let balance = 1000;
-        let betAmount = 100;
-        let isSpinning = false;
+        let currentBet = 0;
+        let multiplier = 1.00;
+        let isRunning = false;
+        let cashoutMultiplier = 0;
+        let gameInterval;
+        let graphCtx;
         let soundEnabled = true;
+        let history = [];
         
-        // Элементы интерфейса
-        const balanceDisplay = document.getElementById('balance');
-        const betAmountDisplay = document.getElementById('bet-amount');
-        const spinBtn = document.getElementById('spin-btn');
-        const betUpBtn = document.getElementById('bet-up');
-        const betDownBtn = document.getElementById('bet-down');
-        const slots = [document.getElementById('slot1'), document.getElementById('slot2'), document.getElementById('slot3')];
-        const winEffect = document.getElementById('win-effect');
-        const jackpotDisplay = document.getElementById('jackpot');
+        // DOM элементы
+        const balanceElement = document.getElementById('balance-amount');
+        const multiplierElement = document.getElementById('multiplier');
+        const betInput = document.getElementById('bet-input');
+        const betAmountElement = document.getElementById('bet-amount');
+        const betButton = document.getElementById('bet-button');
+        const cashoutButton = document.getElementById('cashout-button');
+        const historyElement = document.getElementById('history');
         const soundToggle = document.getElementById('sound-toggle');
-        
-        // Аудио элементы
-        const spinSound = document.getElementById('spin-sound');
+        const graphCanvas = document.getElementById('graph');
+        const tickSound = document.getElementById('tick-sound');
+        const crashSound = document.getElementById('crash-sound');
         const winSound = document.getElementById('win-sound');
-        const jackpotSound = document.getElementById('jackpot-sound');
-        const loseSound = document.getElementById('lose-sound');
-        const backgroundMusic = document.getElementById('background-music');
         
-        // Символы для слотов
-        const symbols = ['🍒', '🍋', '🍊', '🍇', '🍉', '7️⃣', '💰', '🍀'];
+        // Инициализация canvas
+        graphCtx = graphCanvas.getContext('2d');
+        graphCanvas.width = graphCanvas.offsetWidth;
+        graphCanvas.height = graphCanvas.offsetHeight;
         
-        // Инициализация
-        function init() {
-            updateDisplays();
-            createParticles();
-            playBackgroundMusic();
-            
-            // Обработчики событий
-            spinBtn.addEventListener('click', spinSlots);
-            betUpBtn.addEventListener('click', () => changeBet(100));
-            betDownBtn.addEventListener('click', () => changeBet(-100));
-            soundToggle.addEventListener('click', toggleSound);
+        // Обновление отображения баланса
+        function updateBalance() {
+            balanceElement.textContent = balance;
         }
         
-        // Обновление отображения баланса и ставки
-        function updateDisplays() {
-            balanceDisplay.textContent = `Баланс: $${balance}`;
-            betAmountDisplay.textContent = `Ставка: $${betAmount}`;
-            
-            // Блокировка кнопок при недостатке средств
-            betUpBtn.disabled = balance <= betAmount;
-            betDownBtn.disabled = betAmount <= 100;
-            spinBtn.disabled = balance < betAmount || isSpinning;
-        }
+        // Обновление отображения ставки
+        betInput.addEventListener('input', function() {
+            const betValue = Math.min(Math.max(parseInt(this.value) || 10, 10), 1000);
+            this.value = betValue;
+            betAmountElement.textContent = `Ставка: ${betValue}₽`;
+        });
         
-        // Изменение ставки
-        function changeBet(amount) {
-            const newBet = betAmount + amount;
-            if (newBet >= 100 && newBet <= balance) {
-                betAmount = newBet;
-                updateDisplays();
-            }
-        }
-        
-        // Вращение слотов
-        function spinSlots() {
-            if (isSpinning || balance < betAmount) return;
-            
-            isSpinning = true;
-            balance -= betAmount;
-            updateDisplays();
-            
-            playSound(spinSound);
-            
-            // Анимация вращения
-            const spinDuration = 3000; // 3 секунды
-            const startTime = Date.now();
-            
-            // Случайные результаты
-            const results = [
-                symbols[Math.floor(Math.random() * symbols.length)],
-                symbols[Math.floor(Math.random() * symbols.length)],
-                symbols[Math.floor(Math.random() * symbols.length)]
-            ];
-            
-            // Проверка на выигрыш (упрощённая логика)
-            const isWin = results[0] === results[1] && results[1] === results[2];
-            const isJackpot = isWin && results[0] === '💰';
-            
-            // Анимация
-            function animate() {
-                const elapsed = Date.now() - startTime;
-                const progress = Math.min(elapsed / spinDuration, 1);
-                
-                // Вращение слотов
-                slots.forEach((slot, index) => {
-                    const slotItems = slot.querySelectorAll('.slot-item');
-                    const offset = Math.floor(Math.random() * symbols.length) * -250;
-                    
-                    if (progress < 0.9) {
-                        // Быстрое вращение
-                        slotItems[0].style.transform = `translateY(${offset}px)`;
-                        slotItems[0].textContent = symbols[Math.floor(Math.random() * symbols.length)];
-                    } else if (progress >= 0.9 && progress < 1) {
-                        // Замедление
-                        const slowOffset = (progress - 0.9) * 10;
-                        slotItems[0].style.transform = `translateY(${offset * (1 - slowOffset)}px)`;
-                    } else {
-                        // Фиксация результата
-                        slotItems[0].style.transform = 'translateY(0)';
-                        slotItems[0].textContent = results[index];
-                    }
-                });
-                
-                if (progress < 1) {
-                    requestAnimationFrame(animate);
-                } else {
-                    // Завершение вращения
-                    isSpinning = false;
-                    
-                    // Проверка выигрыша
-                    if (isWin) {
-                        const winMultiplier = isJackpot ? 10 : results[0] === '7️⃣' ? 5 : 3;
-                        const winAmount = betAmount * winMultiplier;
-                        balance += winAmount;
-                        
-                        if (isJackpot) {
-                            showJackpot();
-                            playSound(jackpotSound);
-                        } else {
-                            showWinEffect();
-                            playSound(winSound);
-                        }
-                        
-                        createConfetti();
-                        
-                        // Сообщение о выигрыше
-                        const winMessages = {
-                            '🍒': 'Вишнёвый выигрыш!',
-                            '🍋': 'Лимонный куш!',
-                            '🍊': 'Апельсиновый джекпот!',
-                            '🍇': 'Виноградный взрыв!',
-                            '🍉': 'Арбузный фурор!',
-                            '7️⃣': 'СЧАСТЛИВАЯ СЕМЁРКА!',
-                            '💰': 'МЕГА ДЖЕКПОТ!!!',
-                            '🍀': 'Удача на твоей стороне!'
-                        };
-                        
-                        alert(`${winMessages[results[0]]} Вы выиграли $${winAmount}!`);
-                    } else {
-                        playSound(loseSound);
-                    }
-                    
-                    updateDisplays();
-                }
-            }
-            
-            animate();
-        }
-        
-        // Эффект выигрыша
-        function showWinEffect() {
-            winEffect.style.opacity = '1';
-            setTimeout(() => {
-                winEffect.style.opacity = '0';
-            }, 1000);
-        }
-        
-        // Эффект джекпота
-        function showJackpot() {
-            jackpotDisplay.style.top = '50px';
-            jackpotDisplay.style.opacity = '1';
-            
-            setTimeout(() => {
-                jackdotDisplay.style.top = '-100px';
-                jackpotDisplay.style.opacity = '0';
-            }, 3000);
-        }
+        // Звук
+        soundToggle.addEventListener('click', function() {
+            soundEnabled = !soundEnabled;
+            this.textContent = soundEnabled ? '🔊' : '🔇';
+        });
         
         // Создание конфетти
         function createConfetti() {
-            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
-            
             for (let i = 0; i < 100; i++) {
                 const confetti = document.createElement('div');
                 confetti.className = 'confetti';
-                confetti.style.left = `${Math.random() * 100}vw`;
-                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                confetti.style.opacity = '1';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.backgroundColor = `hsl(${Math.random() * 60 + 20}, 100%, 50%)`;
+                confetti.style.width = Math.random() * 10 + 5 + 'px';
+                confetti.style.height = Math.random() * 10 + 5 + 'px';
                 document.body.appendChild(confetti);
                 
-                // Анимация падения
+                // Анимация
                 const animation = confetti.animate([
-                    { transform: `translateY(-100px) rotate(0deg)`, opacity: 1 },
-                    { transform: `translateY(100vh) rotate(${Math.random() * 360}deg)`, opacity: 0 }
+                    { transform: `translateY(-100vh) rotate(0deg)`, opacity: 1 },
+                    { transform: `translateY(${Math.random() * 100 + 100}vh) rotate(${Math.random() * 360}deg)`, opacity: 0 }
                 ], {
-                    duration: 2000 + Math.random() * 3000,
-                    easing: 'cubic-bezier(0.1, 0.8, 0.9, 1)'
+                    duration: Math.random() * 3000 + 2000,
+                    easing: 'cubic-bezier(0.1, 0.8, 0.3, 1)'
                 });
                 
                 animation.onfinish = () => confetti.remove();
             }
         }
         
-        // Частицы фона
-        function createParticles() {
-            const canvas = document.getElementById('particles');
-            const ctx = canvas.getContext('2d');
+        // Отрисовка графика
+        function drawGraph(progress) {
+            graphCtx.clearRect(0, 0, graphCanvas.width, graphCanvas.height);
             
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            // Градиент для графика
+            const gradient = graphCtx.createLinearGradient(0, 0, 0, graphCanvas.height);
+            gradient.addColorStop(0, 'rgba(255, 215, 0, 0.8)');
+            gradient.addColorStop(1, 'rgba(255, 69, 0, 0.2)');
             
-            const particles = [];
-            const particleCount = 100;
+            graphCtx.beginPath();
+            graphCtx.moveTo(0, graphCanvas.height);
             
-            for (let i = 0; i < particleCount; i++) {
-                particles.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    size: Math.random() * 3 + 1,
-                    speedX: Math.random() * 2 - 1,
-                    speedY: Math.random() * 2 - 1,
-                    color: `hsl(${Math.random() * 360}, 100%, 50%)`
-                });
-            }
-            
-            function animateParticles() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // Рисуем кривую
+            for (let x = 0; x <= graphCanvas.width; x++) {
+                const xProgress = x / graphCanvas.width;
+                if (xProgress > progress) break;
                 
-                for (let i = 0; i < particles.length; i++) {
-                    const p = particles[i];
-                    
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                    ctx.fillStyle = p.color;
-                    ctx.fill();
-                    
-                    p.x += p.speedX;
-                    p.y += p.speedY;
-                    
-                    if (p.x < 0 || p.x > canvas.width) p.speedX *= -1;
-                    if (p.y < 0 || p.y > canvas.height) p.speedY *= -1;
-                }
-                
-                requestAnimationFrame(animateParticles);
+                const y = graphCanvas.height * (1 - easeOutQuad(xProgress) * 0.9);
+                graphCtx.lineTo(x, y);
             }
             
-            animateParticles();
-        }
-        
-        // Управление звуком
-        function toggleSound() {
-            soundEnabled = !soundEnabled;
+            graphCtx.strokeStyle = gradient;
+            graphCtx.lineWidth = 3;
+            graphCtx.stroke();
             
-            if (soundEnabled) {
-                soundToggle.textContent = '🔊';
-                playBackgroundMusic();
-            } else {
-                soundToggle.textContent = '🔇';
-                pauseAllSounds();
-            }
+            // Заполнение под кривой
+            graphCtx.lineTo(graphCanvas.width * progress, graphCanvas.height);
+            graphCtx.closePath();
+            graphCtx.fillStyle = 'rgba(255, 215, 0, 0.1)';
+            graphCtx.fill();
         }
         
-        function playSound(sound) {
-            if (!soundEnabled) return;
-            
-            sound.currentTime = 0;
-            sound.play().catch(e => console.log(e));
-        }
-        
-        function playBackgroundMusic() {
-            if (!soundEnabled) return;
-            
-            backgroundMusic.volume = 0.3;
-            backgroundMusic.play().catch(e => console.log(e));
-        }
-        
-        function pauseAllSounds() {
-            spinSound.pause();
-            winSound.pause();
-            jackpotSound.pause();
-            loseSound.pause();
-            backgroundMusic.pause();
+        // Функция плавности
+        function easeOutQuad(t) {
+            return t * (2 - t);
         }
         
         // Запуск игры
-        window.onload = init;
+        betButton.addEventListener('click', function() {
+            if (isRunning) return;
+            
+            const betAmount = parseInt(betInput.value);
+            if (betAmount > balance) {
+                alert('Недостаточно средств!');
+                return;
+            }
+            
+            currentBet = betAmount;
+            balance -= currentBet;
+            updateBalance();
+            
+            isRunning = true;
+            multiplier = 1.00;
+            cashoutMultiplier = 0;
+            betButton.disabled = true;
+            cashoutButton.disabled = false;
+            
+            multiplierElement.textContent = multiplier.toFixed(2) + 'x';
+            multiplierElement.style.color = 'gold';
+            
+            // Определяем точку краша (1.1x - 10x)
+            const crashPoint = 1 + Math.random() * 9;
+            
+            // Запускаем игру
+            let time = 0;
+            const maxTime = 100;
+            
+            gameInterval = setInterval(() => {
+                time++;
+                const progress = time / maxTime;
+                
+                // Увеличиваем множитель (может сломаться в любой момент)
+                if (progress * 10 < crashPoint) {
+                    multiplier = 1 + (progress * 10) * 0.9;
+                    drawGraph(progress * (10 / crashPoint));
+                    
+                    // Звук тика каждые 5 кадров
+                    if (time % 5 === 0 && soundEnabled) {
+                        tickSound.currentTime = 0;
+                        tickSound.play();
+                    }
+                } else {
+                    // Краш!
+                    clearInterval(gameInterval);
+                    isRunning = false;
+                    betButton.disabled = false;
+                    cashoutButton.disabled = true;
+                    
+                    if (soundEnabled) crashSound.play();
+                    
+                    multiplierElement.style.color = 'red';
+                    multiplierElement.textContent = 'КРАШ!';
+                    
+                    // Добавляем в историю
+                    addToHistory(false, crashPoint.toFixed(2));
+                    
+                    // Анимация взрыва
+                    setTimeout(() => {
+                        multiplierElement.textContent = crashPoint.toFixed(2) + 'x';
+                    }, 1000);
+                    
+                    // Сброс через 3 секунды
+                    setTimeout(() => {
+                        multiplierElement.textContent = '1.00x';
+                        multiplierElement.style.color = 'gold';
+                        drawGraph(0);
+                    }, 3000);
+                }
+                
+                multiplierElement.textContent = multiplier.toFixed(2) + 'x';
+            }, 50);
+        });
+        
+        // Кнопка забрать
+        cashoutButton.addEventListener('click', function() {
+            if (!isRunning || cashoutMultiplier > 0) return;
+            
+            cashoutMultiplier = multiplier;
+            clearInterval(gameInterval);
+            isRunning = false;
+            betButton.disabled = false;
+            cashoutButton.disabled = true;
+            
+            const winAmount = Math.floor(currentBet * cashoutMultiplier);
+            balance += winAmount;
+            updateBalance();
+            
+            if (soundEnabled) winSound.play();
+            createConfetti();
+            
+            multiplierElement.style.color = '#4CAF50';
+            multiplierElement.textContent = cashoutMultiplier.toFixed(2) + 'x';
+            
+            // Добавляем в историю
+            addToHistory(true, cashoutMultiplier.toFixed(2));
+            
+            // Сброс через 3 секунды
+            setTimeout(() => {
+                multiplierElement.textContent = '1.00x';
+                multiplierElement.style.color = 'gold';
+                drawGraph(0);
+            }, 3000);
+        });
+        
+        // Добавление в историю
+        function addToHistory(isWin, value) {
+            const item = document.createElement('div');
+            item.className = `history-item ${isWin ? 'win' : 'lose'}`;
+            item.textContent = value;
+            
+            historyElement.insertBefore(item, historyElement.firstChild);
+            history.unshift({ isWin, value });
+            
+            // Ограничиваем историю 10 элементами
+            if (history.length > 10) {
+                historyElement.removeChild(historyElement.lastChild);
+                history.pop();
+            }
+        }
+        
+        // Инициализация
+        updateBalance();
+        drawGraph(0);
     </script>
 </body>
 </html>
